@@ -3,10 +3,15 @@ import paho.mqtt.client as mqtt
 from statistics import mean, stdev
 from collections import deque
 import json
+import logging
 
 # Constants
 FIRST_SAMPLES_COUNT = 100
 OUTLIER_THRESHOLD = 3
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class DecisionMakingComponent:
     """
@@ -27,7 +32,7 @@ class DecisionMakingComponent:
             self.client.on_message = self.on_message
             self.client.connect(broker, port)
         except Exception as e:
-            print(f"Error connecting to MQTT broker: {e}")
+            logger.error(f"Error connecting to MQTT broker: {e}")
             raise
 
         self.threshold = threshold
@@ -42,7 +47,7 @@ class DecisionMakingComponent:
             self.client.subscribe("temperature_meter/+")
             self.client.loop_forever()
         except Exception as e:
-            print(f"Error starting the DecisionMakingComponent: {e}")
+            logger.error(f"Error starting the DecisionMakingComponent: {e}")
             raise
 
     def on_message(self, client, userdata, msg):
@@ -63,7 +68,7 @@ class DecisionMakingComponent:
                 temperature = payload["temperature"]
                 self.handle_temperature(user_id, temperature)
         except Exception as e:
-            print(f"Error handling MQTT message: {e}")
+            logger.error(f"Error handling MQTT message: {e}")
 
     def handle_temperature(self, user_id, temperature):
         """
@@ -90,7 +95,7 @@ class DecisionMakingComponent:
             avg_temp = mean(self.temperatures[user_id])
             self.control_heating_system(user_id, avg_temp)
         except Exception as e:
-            print(f"Error handling temperature reading: {e}")
+            logger.error(f"Error handling temperature reading: {e}")
 
     def detect_outlier(self, samples, value):
         """
@@ -116,7 +121,7 @@ class DecisionMakingComponent:
 
             return False
         except Exception as e:
-            print(f"Error detecting outlier: {e}")
+            logger.error(f"Error detecting outlier: {e}")
             return False
 
     def control_heating_system(self, user_id, avg_temp):
@@ -131,15 +136,15 @@ class DecisionMakingComponent:
             if avg_temp < self.threshold and not self.heating_systems[user_id]:
                 payload = json.dumps({"action": "turn_on"})
                 self.client.publish(f"heating_system/{user_id}/control", payload)
-                print(f'sent signal to heating device to turn on for user id: {user_id}')
+                logger.info(f'Sent signal to heating device to turn on for user id: {user_id}')
                 self.heating_systems[user_id] = True
             elif avg_temp >= self.threshold and self.heating_systems[user_id]:
                 payload = json.dumps({"action": "turn_off"})
                 self.client.publish(f"heating_system/{user_id}/control", payload)
-                print(f'sent signal to heating device to turn off for user id: {user_id}')
+                logger.info(f'Sent signal to heating device to turn off for user id: {user_id}')
                 self.heating_systems[user_id] = False
         except Exception as e:
-            print(f"Error controlling heating system: {e}")
+            logger.error(f"Error controlling heating system: {e}")
 
 if __name__ == "__main__":
     try:
@@ -154,4 +159,4 @@ if __name__ == "__main__":
         decision_making_component = DecisionMakingComponent(args.broker, args.port, args.threshold)
         decision_making_component.start()
     except Exception as e:
-        print(f"Error running DecisionMakingComponent: {e}")
+        logger.error(f"Error running DecisionMakingComponent: {e}")

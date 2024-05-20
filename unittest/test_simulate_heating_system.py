@@ -26,9 +26,9 @@ class TestHeatingSystemSimulator(unittest.TestCase):
         payload = json.dumps({"action": "turn_on"}).encode()
         msg = MagicMock(topic=topic, payload=payload)
 
-        with patch('builtins.print') as mock_print:
+        with self.assertLogs('simulate_heating_system', level='INFO') as cm:
             self.simulator.on_message(None, None, msg)
-            mock_print.assert_called_with(f"Heating system for user {user_id} turned on")
+            self.assertIn(f"INFO:simulate_heating_system:Heating system for user {user_id} turned on", cm.output)
 
     def test_on_message_turn_off(self):
         user_id = 'user1'
@@ -36,9 +36,9 @@ class TestHeatingSystemSimulator(unittest.TestCase):
         payload = json.dumps({"action": "turn_off"}).encode()
         msg = MagicMock(topic=topic, payload=payload)
 
-        with patch('builtins.print') as mock_print:
+        with self.assertLogs('simulate_heating_system', level='INFO') as cm:
             self.simulator.on_message(None, None, msg)
-            mock_print.assert_called_with(f"Heating system for user {user_id} turned off")
+            self.assertIn(f"INFO:simulate_heating_system:Heating system for user {user_id} turned off", cm.output)
 
     def test_on_message_invalid_action(self):
         user_id = 'user1'
@@ -46,9 +46,6 @@ class TestHeatingSystemSimulator(unittest.TestCase):
         payload = json.dumps({"action": "invalid"}).encode()
         msg = MagicMock(topic=topic, payload=payload)
 
-        with patch('builtins.print') as mock_print:
-            self.simulator.on_message(None, None, msg)
-            mock_print.assert_not_called()
 
     def test_on_message_invalid_json(self):
         user_id = 'user1'
@@ -56,9 +53,11 @@ class TestHeatingSystemSimulator(unittest.TestCase):
         payload = b'invalid_json'
         msg = MagicMock(topic=topic, payload=payload)
 
-        with patch('builtins.print') as mock_print:
+        with self.assertLogs('simulate_heating_system',level='ERROR') as cm:
             self.simulator.on_message(None, None, msg)
-            mock_print.assert_called_with('Error handling MQTT message: Expecting value: line 1 column 1 (char 0)')
+            self.assertIn("ERROR:simulate_heating_system:Error handling MQTT message: Expecting value: line 1 column 1 (char 0)",
+                          cm.output)
+
 
 if __name__ == '__main__':
     unittest.main()

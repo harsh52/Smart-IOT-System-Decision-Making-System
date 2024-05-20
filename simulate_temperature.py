@@ -3,6 +3,11 @@ import time
 import json
 import random
 import argparse
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class TemperatureMeterSimulator:
     """
@@ -22,7 +27,7 @@ class TemperatureMeterSimulator:
         try:
             self.client.connect(broker, port)
         except Exception as e:
-            print(f"Error connecting to MQTT broker: {e}")
+            logger.error(f"Error connecting to MQTT broker: {e}")
             raise
         self.user_ids = user_ids
         self.topic = "temperature_meter/{}"
@@ -34,7 +39,7 @@ class TemperatureMeterSimulator:
         try:
             self.simulate_temperature()
         except Exception as e:
-            print(f"Error simulating temperature readings: {e}")
+            logger.error(f"Error simulating temperature readings: {e}")
             raise
 
     def simulate_temperature(self):
@@ -47,9 +52,9 @@ class TemperatureMeterSimulator:
                 message = json.dumps({"temperature": temperature})
                 try:
                     self.client.publish(self.topic.format(user_id), message)
-                    print(f"Published {message} to {self.topic.format(user_id)}")
+                    logger.info(f"Published {message} to {self.topic.format(user_id)}")
                 except Exception as e:
-                    print(f"Error publishing temperature reading: {e}")
+                    logger.error(f"Error publishing temperature reading: {e}")
             time.sleep(1)
 
 if __name__ == "__main__":
@@ -67,4 +72,4 @@ if __name__ == "__main__":
         simulator = TemperatureMeterSimulator(args.broker, args.port, user_ids)
         simulator.start()
     except Exception as e:
-        print(f"Error running TemperatureMeterSimulator: {e}")
+        logger.error(f"Error running TemperatureMeterSimulator: {e}")

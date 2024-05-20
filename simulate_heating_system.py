@@ -1,6 +1,11 @@
 import paho.mqtt.client as mqtt
 import json
 import argparse
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class HeatingSystemSimulator:
     """
@@ -20,7 +25,7 @@ class HeatingSystemSimulator:
         try:
             self.client.connect(broker, port)
         except Exception as e:
-            print(f"Error connecting to MQTT broker: {e}")
+            logger.error(f"Error connecting to MQTT broker: {e}")
             raise
 
     def start(self):
@@ -31,7 +36,7 @@ class HeatingSystemSimulator:
             self.client.subscribe("heating_system/+/control")
             self.client.loop_forever()
         except Exception as e:
-            print(f"Error starting the HeatingSystemSimulator: {e}")
+            logger.error(f"Error starting the HeatingSystemSimulator: {e}")
             raise
 
     def on_message(self, client, userdata, msg):
@@ -50,11 +55,11 @@ class HeatingSystemSimulator:
 
             if topic[2] == "control":
                 if payload["action"] == "turn_on":
-                    print(f"Heating system for user {user_id} turned on")
+                    logger.info(f"Heating system for user {user_id} turned on")
                 elif payload["action"] == "turn_off":
-                    print(f"Heating system for user {user_id} turned off")
+                    logger.info(f"Heating system for user {user_id} turned off")
         except Exception as e:
-            print(f"Error handling MQTT message: {e}")
+            logger.error(f"Error handling MQTT message: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Heating System Simulation")
@@ -68,4 +73,4 @@ if __name__ == "__main__":
         simulator = HeatingSystemSimulator(args.broker, args.port)
         simulator.start()
     except Exception as e:
-        print(f"Error running HeatingSystemSimulator: {e}")
+        logger.error(f"Error running HeatingSystemSimulator: {e}")
