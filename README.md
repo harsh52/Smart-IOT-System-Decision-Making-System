@@ -31,7 +31,7 @@ python decision_making_component.py -b mqtt.eclipseprojects.io -p 1883 -t 20
 
 ### HeatingSystemSimulator
 
-This component simulates a heating system, subscribing to control messages and printing actions (turn on/off) for specific users.
+This component simulates a heating system, subscribing to control messages and logging actions (turn on/off) for specific users.
 
 #### Usage
 
