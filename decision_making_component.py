@@ -18,23 +18,16 @@ class DecisionMakingComponent:
     A class that implements a decision-making component for a smart heating system.
     """
 
-    def __init__(self, broker, port, threshold):
+    def __init__(self, client, threshold):
         """
         Initialize the DecisionMakingComponent.
 
         Args:
-            broker (str): The address of the MQTT broker.
-            port (int): The port number of the MQTT broker.
+            client (mqtt.Client): An instance of the MQTT client.
             threshold (float): The temperature threshold in degrees Celsius.
         """
-        try:
-            self.client = mqtt.Client()
-            self.client.on_message = self.on_message
-            self.client.connect(broker, port)
-        except Exception as e:
-            logger.error(f"Error connecting to MQTT broker: {e}")
-            raise
-
+        self.client = client
+        self.client.on_message = self.on_message
         self.threshold = threshold
         self.temperatures = {}
         self.heating_systems = {}
@@ -156,8 +149,12 @@ if __name__ == "__main__":
         parser.add_argument("-t", "--threshold", type=float, required=True, help="Temperature threshold in degrees Celsius")
         args = parser.parse_args()
 
+        # Create MQTT client
+        client = mqtt.Client()
+        client.connect(args.broker, args.port)
+
         # Create and start the DecisionMakingComponent
-        decision_making_component = DecisionMakingComponent(args.broker, args.port, args.threshold)
+        decision_making_component = DecisionMakingComponent(client, args.threshold)
         decision_making_component.start()
     except Exception as e:
         logger.error(f"Error running DecisionMakingComponent: {e}")

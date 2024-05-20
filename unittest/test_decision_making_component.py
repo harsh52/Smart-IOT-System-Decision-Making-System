@@ -1,22 +1,15 @@
 import unittest
-from unittest.mock import patch, MagicMock, call
-from decision_making_component import DecisionMakingComponent, FIRST_SAMPLES_COUNT, OUTLIER_THRESHOLD
+from unittest.mock import MagicMock
+from decision_making_component import DecisionMakingComponent, FIRST_SAMPLES_COUNT
 from collections import deque
 import json
 
 
 class TestDecisionMakingComponent(unittest.TestCase):
-    @patch('paho.mqtt.client.Client')
-    def setUp(self, MockClient):
-        self.mock_mqtt_client = MockClient.return_value
-        self.broker = 'test_broker'
-        self.port = 1883
+    def setUp(self):
+        self.mock_mqtt_client = MagicMock()
         self.threshold = 22.0
-        self.component = DecisionMakingComponent(self.broker, self.port, self.threshold)
-        self.component.client = self.mock_mqtt_client
-
-    def test_mqtt_connection(self):
-        self.mock_mqtt_client.connect.assert_called_with(self.broker, self.port)
+        self.component = DecisionMakingComponent(self.mock_mqtt_client, self.threshold)
 
     def test_start(self):
         self.component.start()
