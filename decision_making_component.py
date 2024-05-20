@@ -83,15 +83,16 @@ class DecisionMakingComponent:
                 self.temperatures[user_id] = deque(maxlen=FIRST_SAMPLES_COUNT)
                 self.heating_systems[user_id] = False
 
-            self.temperatures[user_id].append(temperature)
 
             if len(self.temperatures[user_id]) < FIRST_SAMPLES_COUNT:
+                self.temperatures[user_id].append(temperature)
                 return
 
             is_outlier = self.detect_outlier(self.temperatures[user_id], temperature)
             if is_outlier:
                 return
 
+            self.temperatures[user_id].append(temperature)
             avg_temp = mean(self.temperatures[user_id])
             self.control_heating_system(user_id, avg_temp)
         except Exception as e:
