@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import json
 import argparse
 import logging
+from typing import Any
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +13,7 @@ class HeatingSystemSimulator:
     A class that simulates a heating system and responds to control messages received via MQTT.
     """
 
-    def __init__(self, broker, port):
+    def __init__(self, broker: str, port: int) -> None:
         """
         Initialize the HeatingSystemSimulator.
 
@@ -28,7 +29,7 @@ class HeatingSystemSimulator:
             logger.error(f"Error connecting to MQTT broker: {e}")
             raise
 
-    def start(self):
+    def start(self) -> None:
         """
         Start the HeatingSystemSimulator by subscribing to the heating system control topic and starting the MQTT loop.
         """
@@ -39,13 +40,13 @@ class HeatingSystemSimulator:
             logger.error(f"Error starting the HeatingSystemSimulator: {e}")
             raise
 
-    def on_message(self, client, userdata, msg):
+    def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
         """
         Callback function called when an MQTT message is received.
 
         Args:
             client (mqtt.Client): The MQTT client instance.
-            userdata (any): User-defined data passed to the callback function.
+            userdata (Any): User-defined data passed to the callback function.
             msg (mqtt.MQTTMessage): The received MQTT message.
         """
         try:
