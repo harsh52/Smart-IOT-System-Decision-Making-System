@@ -4,6 +4,7 @@ import json
 import random
 import argparse
 import logging
+from typing import List
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -14,14 +15,14 @@ class TemperatureMeterSimulator:
     A class that simulates a temperature meter and publishes temperature readings to an MQTT broker.
     """
 
-    def __init__(self, broker, port, user_ids):
+    def __init__(self, broker: str, port: int, user_ids: List[str]) -> None:
         """
         Initialize the TemperatureMeterSimulator.
 
         Args:
             broker (str): The address of the MQTT broker.
             port (int): The port number of the MQTT broker.
-            user_ids (list): A list of user IDs to simulate temperature readings for.
+            user_ids (List[str]): A list of user IDs to simulate temperature readings for.
         """
         self.client = mqtt.Client()
         try:
@@ -32,7 +33,7 @@ class TemperatureMeterSimulator:
         self.user_ids = user_ids
         self.topic = "temperature_meter/{}"
 
-    def start(self):
+    def start(self) -> None:
         """
         Start the TemperatureMeterSimulator by simulating temperature readings.
         """
@@ -42,7 +43,7 @@ class TemperatureMeterSimulator:
             logger.error(f"Error simulating temperature readings: {e}")
             raise
 
-    def simulate_temperature(self):
+    def simulate_temperature(self) -> None:
         """
         Simulate temperature readings by publishing random temperatures to the MQTT broker.
         """
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 
     try:
         # User IDs to simulate multiple devices
-        user_ids = ["user1", "user2", "user3"]
+        user_ids: List[str] = ["user1", "user2", "user3"]
 
         # Create and start the TemperatureMeterSimulator
         simulator = TemperatureMeterSimulator(args.broker, args.port, user_ids)

@@ -4,6 +4,7 @@ from statistics import mean, stdev
 from collections import deque
 import json
 import logging
+from typing import Deque, Dict, Any
 
 # Constants
 FIRST_SAMPLES_COUNT = 100
@@ -18,7 +19,7 @@ class DecisionMakingComponent:
     A class that implements a decision-making component for a smart heating system.
     """
 
-    def __init__(self, client, threshold):
+    def __init__(self, client: mqtt.Client, threshold: float) -> None:
         """
         Initialize the DecisionMakingComponent.
 
@@ -29,10 +30,10 @@ class DecisionMakingComponent:
         self.client = client
         self.client.on_message = self.on_message
         self.threshold = threshold
-        self.temperatures = {}
-        self.heating_systems = {}
+        self.temperatures: Dict[str, Deque[float]] = {}
+        self.heating_systems: Dict[str, bool] = {}
 
-    def start(self):
+    def start(self) -> None:
         """
         Start the DecisionMakingComponent by subscribing to the temperature meter topic and starting the MQTT loop.
         """
@@ -43,13 +44,13 @@ class DecisionMakingComponent:
             logger.error(f"Error starting the DecisionMakingComponent: {e}")
             raise
 
-    def on_message(self, client, userdata, msg):
+    def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
         """
         Callback function called when an MQTT message is received.
 
         Args:
             client (mqtt.Client): The MQTT client instance.
-            userdata (any): User-defined data passed to the callback function.
+            userdata (Any): User-defined data passed to the callback function.
             msg (mqtt.MQTTMessage): The received MQTT message.
         """
         try:
@@ -63,7 +64,7 @@ class DecisionMakingComponent:
         except Exception as e:
             logger.error(f"Error handling MQTT message: {e}")
 
-    def handle_temperature(self, user_id, temperature):
+    def handle_temperature(self, user_id: str, temperature: float) -> None:
         """
         Handle a temperature reading received from the temperature meter.
 
@@ -91,12 +92,12 @@ class DecisionMakingComponent:
         except Exception as e:
             logger.error(f"Error handling temperature reading: {e}")
 
-    def detect_outlier(self, samples, value):
+    def detect_outlier(self, samples: Deque[float], value: float) -> bool:
         """
         Detect if a temperature reading is an outlier using the Z-score algorithm.
 
         Args:
-            samples (deque): The deque containing the last FIRST_SAMPLES_COUNT temperature readings.
+            samples (Deque[float]): The deque containing the last FIRST_SAMPLES_COUNT temperature readings.
             value (float): The temperature reading to check for an outlier.
 
         Returns:
@@ -118,7 +119,7 @@ class DecisionMakingComponent:
             logger.error(f"Error detecting outlier: {e}")
             return False
 
-    def control_heating_system(self, user_id, avg_temp):
+    def control_heating_system(self, user_id: str, avg_temp: float) -> None:
         """
         Control the heating system based on the average temperature for the user.
 
